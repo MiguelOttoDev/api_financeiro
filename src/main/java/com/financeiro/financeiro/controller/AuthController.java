@@ -36,5 +36,4 @@ public class AuthController {
                 .map(u -> ResponseEntity.ok(jwtUtil.gerarToken(u.getUsername())))
                 .orElse(ResponseEntity.status(401).body("Credenciais inválidas"));
     }
-
 }
