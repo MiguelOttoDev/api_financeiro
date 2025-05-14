@@ -24,7 +24,6 @@ public class FinancaController {
         this.userService = userService;
     }
 
-    // Adicionar uma nova transação financeira
     @PostMapping("/adicionar")
     public ResponseEntity<?> adicionarFinanca(@RequestBody Financa financa, Authentication authentication) {
         String username = authentication.getName(); // Já está autenticado via JWT
@@ -39,7 +38,6 @@ public class FinancaController {
         return ResponseEntity.ok("Finança adicionada com sucesso.");
     }
 
-    // Listar todas as finanças de um usuário
     @GetMapping("/listar")
     public ResponseEntity<?> listarFinancas(Authentication authentication) {
         String username = authentication.getName();
@@ -54,7 +52,6 @@ public class FinancaController {
         return ResponseEntity.ok(financas);
     }
 
-    // Gerar um resumo financeiro de um usuário
     @GetMapping("/resumo")
     public ResponseEntity<?> gerarResumo(Authentication authentication) {
         String username = authentication.getName();
@@ -68,23 +65,6 @@ public class FinancaController {
         String resumo = financaService.gerarResumo(user);
         return ResponseEntity.ok(resumo);
     }
-
-    @GetMapping("/resumo-data")
-    public ResponseEntity<String> resumoPorData(
-            @RequestParam String inicio,
-            @RequestParam String fim,
-            Authentication auth
-    ) {
-        String username = auth.getName();
-        Optional<User> userOpt = userService.buscarPorUsername(username);
-        if (userOpt.isEmpty()) return ResponseEntity.status(401).body("Usuário não autenticado.");
-
-        LocalDate dataInicio = LocalDate.parse(inicio);
-        LocalDate dataFim = LocalDate.parse(fim);
-        String resumo = financaService.gerarResumoPorData(userOpt.get(), dataInicio, dataFim);
-        return ResponseEntity.ok(resumo);
-    }
-
 
     @GetMapping("/resumo/periodo")
     public ResponseEntity<String> gerarResumoPorPeriodo(
