@@ -6,8 +6,11 @@ import com.financeiro.financeiro.model.TipoFinanca;
 import com.financeiro.financeiro.model.User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class FinancaService {
@@ -25,20 +28,15 @@ public class FinancaService {
             return "Usuário não encontrado ou conta não associada.";
         }
 
-        // Define o nome do usuário na Financa
         financa.setNome(user.getUsername());
-
-        // Define o ID da transação (usando contador interno)
         financa.setId(Financa.getProximoId());
 
-        // Atualiza o saldo com base no tipo da transação
         if (financa.getTipo() == TipoFinanca.RECEITA) {
             conta.setSaldo(conta.getSaldo() + financa.getValor());
         } else if (financa.getTipo() == TipoFinanca.DESPESA) {
             conta.setSaldo(conta.getSaldo() - financa.getValor());
         }
 
-        // Adiciona a finança à lista
         financas.add(financa);
         return "Transação registrada com sucesso!";
     }
@@ -78,5 +76,77 @@ public class FinancaService {
                 "Entradas: " + totalEntradas + "\n" +
                 "Saídas: " + totalSaidas + "\n" +
                 "Saldo Atual: " + saldoAtual;
+    }
+
+    public String gerarResumoPorData(User user, LocalDate dataInicio, LocalDate dataFim) {
+        double entradas = 0.0;
+        double saidas = 0.0;
+
+        for (Financa f : financas) {
+            if (f.getNome().equals(user.getUsername())) {
+                LocalDate data = LocalDate.parse(f.getData());
+                if (!data.isBefore(dataInicio) && !data.isAfter(dataFim)) {
+                    if (f.getTipo() == TipoFinanca.RECEITA) {
+                        entradas += f.getValor();
+                    } else {
+                        saidas += f.getValor();
+                    }
+                }
+            }
+        }
+
+        return "Entradas: " + entradas + "\nSaídas: " + saidas + "\nSaldo: " + (entradas - saidas);
+    }
+
+    public String gerarResumoPorPeriodo(User user, String tipoPeriodo, LocalDate dataReferencia) {
+        LocalDate inicio;
+        LocalDate fim;
+
+        switch (tipoPeriodo.toLowerCase()) {
+            case "dia":
+                inicio = dataReferencia;
+                fim = dataReferencia;
+                break;
+            case "semana":
+                WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                inicio = dataReferencia.with(weekFields.dayOfWeek(), 1);
+                fim = dataReferencia.with(weekFields.dayOfWeek(), 7);
+                break;
+            case "mes":
+                inicio = dataReferencia.withDayOfMonth(1);
+                fim = dataReferencia.withDayOfMonth(dataReferencia.lengthOfMonth());
+                break;
+            case "ano":
+                inicio = dataReferencia.withDayOfYear(1);
+                fim = dataReferencia.withDayOfYear(dataReferencia.lengthOfYear());
+                break;
+            default:
+                return "Tipo de período inválido. Use: dia, semana, mes, ano.";
+        }
+
+        return gerarResumoPorData(user, inicio, fim);
+    }
+
+    public boolean editarFinanca(int id, Financa novaFinanca, User user) {
+        for (int i = 0; i < financas.size(); i++) {
+            Financa f = financas.get(i);
+            if (f.getId() == id && f.getNome().equals(user.getUsername())) {
+                novaFinanca.setId(id);
+                novaFinanca.setNome(user.getUsername());
+                financas.set(i, novaFinanca);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removerFinanca(int id, User user) {
+        return financas.removeIf(f -> f.getId() == id && f.getNome().equals(user.getUsername()));
+    }
+
+    public List<Financa> buscarPorDescricao(User user, String descricao) {
+        return financas.stream()
+                .filter(f -> f.getNome().equals(user.getUsername()) && f.getDescricao().toLowerCase().contains(descricao.toLowerCase()))
+                .toList();
     }
 }

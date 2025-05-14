@@ -1,0 +1,93 @@
+DOCUMENTAÇÃO DA API FINANCEIRA
+
+Autenticação:
+A API usa autenticação via JWT. Para acessar os endpoints, é necessário enviar o token no cabeçalho:
+Authorization: Bearer <seu_token_aqui>
+
+Endpoints:
+
+1. Cadastrar Finança
+POST /financas/adicionar
+Descrição: Adiciona uma nova transação (receita ou despesa).
+Corpo da requisição:
+{
+  "descricao": "Salário",
+  "valor": 3000.00,
+  "data": "2025-05-01",
+  "tipo": "RECEITA"
+}
+Resposta: "Transação registrada com sucesso!"
+
+2. Listar Transações do Usuário
+GET /financas/listar
+Descrição: Retorna todas as finanças registradas pelo usuário.
+Resposta:
+[
+  {
+    "id": 1,
+    "nome": "usuario123",
+    "descricao": "Aluguel",
+    "valor": 1200.0,
+    "data": "2025-05-01",
+    "tipo": "DESPESA"
+  }
+]
+
+3. Resumo Geral
+GET /financas/resumo
+Descrição: Retorna o resumo financeiro total do usuário.
+Resposta:
+{
+  "Entradas": 4000.0,
+  "Saídas": 2500.0,
+  "Saldo Atual": 1500.0
+}
+
+4. Resumo por Período
+GET /financas/resumo/periodo?periodo=mes&data=2025-05-01
+Descrição: Gera resumo por período com base em uma data referência.
+Parâmetros:
+- periodo: dia, semana, mes, ano
+- data: YYYY-MM-DD
+Resposta:
+{
+  "Entradas": 3000.0,
+  "Saídas": 1200.0,
+  "Saldo": 1800.0
+}
+
+5. Editar Transação
+PUT /financas/editar/{id}
+Descrição: Altera uma transação já cadastrada.
+Corpo:
+{
+  "descricao": "Supermercado",
+  "valor": 500.0,
+  "data": "2025-05-05",
+  "tipo": "DESPESA"
+}
+Resposta: "Transação atualizada com sucesso!"
+
+6. Remover Transação
+DELETE /financas/remover/{id}
+Descrição: Remove uma transação do usuário pelo ID.
+Resposta: "Transação removida com sucesso!"
+
+7. Buscar Transações por Descrição
+GET /financas/buscar?descricao=aluguel
+Descrição: Retorna transações contendo a descrição buscada.
+Resposta:
+[
+  {
+    "id": 2,
+    "descricao": "Aluguel de Maio",
+    "valor": 1500.0,
+    "data": "2025-05-01",
+    "tipo": "DESPESA"
+  }
+]
+
+Observações:
+- Todos os endpoints requerem autenticação via JWT.
+- Datas devem estar no formato YYYY-MM-DD.
+- Os tipos de transação válidos são RECEITA e DESPESA.
