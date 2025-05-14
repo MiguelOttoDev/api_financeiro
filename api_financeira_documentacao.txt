@@ -1,6 +1,14 @@
 DOCUMENTAÇÃO DA API FINANCEIRA
 
+API RODANDO NA POSTA 8080
+
 Autenticação:
+
+POST /auth/register
+Para cadastro
+
+POST /auth/login
+
 A API usa autenticação via JWT. Para acessar os endpoints, é necessário enviar o token no cabeçalho:
 Authorization: Bearer <seu_token_aqui>
 
